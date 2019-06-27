@@ -1,5 +1,9 @@
 source('R/analysis_functions.R')
 
+year_from <- 1997
+year_test <- 2012
+output_dir <- '{year_from}_{year_test - 1}' %>% g
+file <- 'RF_{year_from}_{year_test - 1}.RData' %>% g
 # load(file='RF_1996_2015.RData')
 
 # Zonal statistics
@@ -23,6 +27,9 @@ experiments <- c(
   fivefolds_freq_s
 )
 
+for (exp in experiments) {
+  writeRaster(exp@raster, "{output_dir}/{exp@name}.tiff" %>% g, overwrite = TRUE)
+}
 
 for (exp in experiments) {
   if ( exp@season == 1 ){

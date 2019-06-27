@@ -5,8 +5,8 @@ box_dimension <- 15000
 ntree <- 750
 nodesize <- 50
 
-year_from <- 1996
-year_test <- 2016
+year_from <- 1997
+year_test <- 2012
 
 
 # ------------------------------------------------------------------------ #
@@ -164,5 +164,22 @@ fivefolds_freq_s <- do_experiment(
   points_df, fires_df, excluded_cols, season, 
   year_from, year_test, box_dimension, nfolds,
   mtry, ntree, nodesize, name, resolution
+)
+
+
+save(onefold_std_w,
+  onefold_perc_w,
+  onefold_freq_w,
+  fivefolds_std_w,
+  fivefolds_perc_w,
+  fivefolds_freq_w,
+  onefold_std_s,
+  onefold_perc_s,
+  onefold_freq_s,
+  fivefolds_std_s,
+  fivefolds_perc_s,
+  fivefolds_freq_s,
+
+  file = 'RF_{year_from}_{year_test - 1}.RData' %>% g
 )
 
