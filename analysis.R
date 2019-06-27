@@ -4,7 +4,6 @@ year_from <- 1997
 year_test <- 2012
 output_dir <- '{year_from}_{year_test - 1}' %>% g
 file <- 'RF_{year_from}_{year_test - 1}.RData' %>% g
-# load(file='RF_1996_2015.RData')
 
 # Zonal statistics
 BA <- readOGR("shapefiles/perimetrazioni_1997_2017.shp")
