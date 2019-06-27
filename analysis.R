@@ -1,10 +1,12 @@
 source('R/analysis_functions.R')
 
-year_from <- 1997
-year_test <- 2012
+
 output_dir <- 'output/{year_from}_{year_test - 1}' %>% g
 dir.create(output_dir, showWarnings = F)
+
 load_data = F
+do_class_imp = T
+
 if ( load_data ){
   data_file <- 'output/RF_{year_from}_{year_test - 1}.RData' %>% g
   load(data_file)
@@ -22,13 +24,15 @@ experiments <- c(
   fivefolds_std_w,
   fivefolds_perc_w,
   fivefolds_freq_w,
-
+  ninefolds_perc_w,
+  
   onefold_std_s,
   onefold_perc_s,
   onefold_freq_s,
   fivefolds_std_s,
   fivefolds_perc_s,
-  fivefolds_freq_s
+  fivefolds_freq_s,
+  ninefolds_perc_s
 )
 
 for (exp in experiments) {
@@ -42,7 +46,7 @@ for (exp in experiments) {
     BA_test <- BA_test_s
   }
   
-  print(exp@name)
+  print('{year} - {exp@name}' %>% g)
   out_dir <- "{output_dir}/{exp@name}" %>% g
   dir.create(out_dir, showWarnings = F)
   
@@ -64,15 +68,17 @@ for (exp in experiments) {
   plot_var_importance(exp)
   dev.off()
   
-  # png(filename = "{out_dir}/class_imp_type.png" %>% g, width = 1920, height = 1080)
-  # plot_class_importance(exp, 'veg_type')
-  # dev.off()
-
-  # if ( 'veg_freq' %in% exp@columns ){
-    # png(filename = "{out_dir}/class_imp_freq.png" %>% g, width = 1920, height = 1080)
-    # plot_class_importance(exp, 'veg_freq')
-    # dev.off()
-  # }
+  if (do_class_imp){
+    svg(filename = "{out_dir}/class_imp_type.svg" %>% g)
+    plot_class_importance(exp, 'veg_type')
+    dev.off()
+  
+    if ( 'veg_freq' %in% exp@columns ){
+      svg(filename = "{out_dir}/class_imp_freq.svg" %>% g)
+      plot_class_importance(exp, 'veg_freq')
+      dev.off()
+    }
+  }
 
 }
 
@@ -107,6 +113,5 @@ for (exp in experiments) {
   raster_vals <- exp@raster@data@values
   count = sum((raster_vals>=0.5), na.rm=T)
   value = count/sum(!is.na(raster_vals)) *100
-  print("{exp@name} - {value}" %>% g)
-  print("{exp@name} - {mean(exp@auc)}" %>% g)
+  print("{exp@name} - auc: {mean(exp@auc)} - area: {value}" %>% g)
 }
