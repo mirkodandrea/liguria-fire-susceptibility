@@ -2,13 +2,13 @@ source('R/model_functions.R')
 
 resolution = 100
 box_dimension <- 15000
-ntree <- 750
+ntree <- 10
 nodesize <- 50
 
 year_from <- 1997
 year_test <- 2012
 
-
+data_file <- 'output/RF_{year_from}_{year_test - 1}.RData' %>% g
 # ------------------------------------------------------------------------ #
 # load data
 data_dir = 'data_{resolution}m' %>% g
@@ -180,6 +180,6 @@ save(onefold_std_w,
   fivefolds_perc_s,
   fivefolds_freq_s,
 
-  file = 'RF_{year_from}_{year_test - 1}.RData' %>% g
+  file = data_file
 )
 
