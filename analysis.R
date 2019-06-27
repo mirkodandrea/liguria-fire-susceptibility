@@ -5,6 +5,8 @@ year_test <- 2012
 output_dir <- '{year_from}_{year_test - 1}' %>% g
 file <- 'RF_{year_from}_{year_test - 1}.RData' %>% g
 
+# ciao
+
 # Zonal statistics
 BA <- readOGR("shapefiles/perimetrazioni_1997_2017.shp")
 BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
