@@ -8,12 +8,15 @@ output/
 # Edit at https://www.gitignore.io/?templates=r
 
 ### R ###
+*.Rproj
+
 # History files
 .Rhistory
 .Rapp.history
 
 # Session Data files
 .RData
+*.RData
 
 # User-specific files
 .Ruserdata
@@ -49,3 +52,4 @@ vignettes/*.pdf
 # R package: bookdown caching files
 /*_files/
 
+.Rproj.user
