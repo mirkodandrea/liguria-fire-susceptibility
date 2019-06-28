@@ -1,3 +1,10 @@
+source('R/model_functions.R')
+source('R/analysis_functions.R')
+
+resolution = 100
+box_dimension <- 15000
+ntree <- 750
+nodesize <- 50
 # load data
 data_dir = 'data_{resolution}m' %>% g
 points_df <- read.csv('{data_dir}/points.csv' %>% g, row.names="point_index")
