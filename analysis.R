@@ -1,11 +1,11 @@
-source('R/analysis_functions.R')
+
 
 
 output_dir <- 'output/{year_from}_{year_test - 1}' %>% g
 dir.create(output_dir, showWarnings = F)
 
 load_data = F
-do_class_imp = T
+do_class_imp = F
 
 if ( load_data ){
   data_file <- 'output/RF_{year_from}_{year_test - 1}.RData' %>% g
@@ -20,18 +20,18 @@ BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
 experiments <- c(
   onefold_std_w,
   onefold_perc_w,
-  onefold_freq_w,
+  # onefold_freq_w,
   fivefolds_std_w,
   fivefolds_perc_w,
-  fivefolds_freq_w,
+  # fivefolds_freq_w,
   ninefolds_perc_w,
   
   onefold_std_s,
   onefold_perc_s,
-  onefold_freq_s,
+  # onefold_freq_s,
   fivefolds_std_s,
   fivefolds_perc_s,
-  fivefolds_freq_s,
+  # fivefolds_freq_s,
   ninefolds_perc_s
 )
 
@@ -46,7 +46,7 @@ for (exp in experiments) {
     BA_test <- BA_test_s
   }
   
-  print('{year} - {exp@name}' %>% g)
+  print('{exp@name}' %>% g)
   out_dir <- "{output_dir}/{exp@name}" %>% g
   dir.create(out_dir, showWarnings = F)
   
@@ -95,7 +95,7 @@ for(year in seq(1997, 2017)){
       BA_test <- BA_test_s
     }
     
-    print(exp@name)
+    print('{year} - {exp@name}' %>% g)
     df_binary <- extract_on_thresholds(exp@raster, BA_test, 
                                        thresholds=c(0, 0.5, 1), 
                                        thresholds_name=c('N', 'Y'))
@@ -115,3 +115,22 @@ for (exp in experiments) {
   value = count/sum(!is.na(raster_vals)) *100
   print("{exp@name} - auc: {mean(exp@auc)} - area: {value}" %>% g)
 }
+
+
+dataset_w <- build_dataset(points_df, fires_df, 1, year_test, 9999)
+test_dataset_w <- select_pseudo_absences(dataset_w@data, dataset_w@data$fire == 1)
+
+
+dataset_s <- build_dataset(points_df, fires_df, 2, year_test, 9999)
+test_dataset_s <- select_pseudo_absences(dataset_s@data, dataset_s@data$fire == 1)
+
+for (exp in experiments) {
+  if ( exp@season == 1 ){
+    rmse_value <- test_experiment(exp, test_dataset_w)
+  } else {
+    rmse_value <- test_experiment(exp, test_dataset_s)
+  }
+  print('{exp@name} : {rmse_value}' %>% g)
+}
+
+

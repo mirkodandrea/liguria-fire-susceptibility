@@ -159,3 +159,28 @@ extract_on_thresholds <- function(raster, BA,
 }
 
 
+test_experiment <- function(exp, test_dataset){
+  obs_value <- test_dataset$fire == '1'
+  
+  list_of_pred <- c()
+  col <- 1
+  for( m in exp@models ){
+    print("fit: {col}/{length(exp@models)}" %>% g)
+    pred <- predict(
+      object = m, 
+      newdata = test_dataset[, exp@columns], 
+      type = "prob"
+    )
+    
+    # print(rmse(obs_value, pred[,2]))
+    
+    list_of_pred <- cbind(list_of_pred, pred[,2])
+    col = col + 1
+  }
+  
+  pred_mean <- rowMeans(list_of_pred)
+  
+  
+  rmse(obs_value, pred_mean)
+}
+
