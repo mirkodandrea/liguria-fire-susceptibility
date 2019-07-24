@@ -60,12 +60,12 @@ plot_var_importance <- function(exp){
   df <- df[order(-df$mean),]
   df
   
-  ggplot(df, aes(x=reorder(class, -mean), y=mean)) + 
+  return(ggplot(df, aes(x=reorder(class, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
     geom_line() +
     geom_point() +
     ggtitle(exp@name) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
 }
 
 plot_class_importance <- function(exp, variable){
@@ -89,12 +89,12 @@ plot_class_importance <- function(exp, variable){
   df <- df[order(-df$mean),]
   df
   
-  ggplot(df, aes(x=reorder(type, -mean), y=mean)) + 
+  return(ggplot(df, aes(x=reorder(type, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
     geom_line() +
     geom_point() +
     ggtitle(exp@name) +
-    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)))
 }
 
 plot_ecdf <- function(raster, BA, add=F, col='black'){

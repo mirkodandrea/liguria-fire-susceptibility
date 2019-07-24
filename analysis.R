@@ -1,6 +1,4 @@
 
-
-
 output_dir <- 'output/{year_from}_{year_test - 1}' %>% g
 dir.create(output_dir, showWarnings = F)
 
@@ -64,22 +62,29 @@ for (exp in experiments) {
   print(df_binary)
   write.csv(df_binary, file = "{out_dir}/binary.csv" %>% g)
   
-  svg(filename = "{out_dir}/var_imp.svg" %>% g)
-  plot_var_importance(exp)
+  svg_filename <- "{out_dir}/var_imp.svg" %>% g
+  print("Writing {svg_filename}" %>% g)
+  svg(
+    filename = svg_filename,
+    width=12, 
+    height=9, 
+    pointsize=12
+  )
+  print(plot_var_importance(exp))
   dev.off()
+  
   
   if (do_class_imp){
     svg(filename = "{out_dir}/class_imp_type.svg" %>% g)
-    plot_class_importance(exp, 'veg_type')
+    print(plot_class_importance(exp, 'veg_type'))
     dev.off()
   
     if ( 'veg_freq' %in% exp@columns ){
       svg(filename = "{out_dir}/class_imp_freq.svg" %>% g)
-      plot_class_importance(exp, 'veg_freq')
+      print(plot_class_importance(exp, 'veg_freq'))
       dev.off()
     }
   }
-
 }
 
 
