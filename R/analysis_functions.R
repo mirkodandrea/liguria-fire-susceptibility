@@ -38,7 +38,7 @@ extract_stats <- function(raster, BA){
 
 
 
-plot_var_importance <- function(exp){
+plot_var_importance <- function(exp, n=NULL){
   imp <- c()
   
   for (c in 1:length(exp@models)){
@@ -58,17 +58,27 @@ plot_var_importance <- function(exp){
   colnames(df) <- c('mean', 'sd')
   df$class <- rownames(df)
   df <- df[order(-df$mean),]
-  df
+  if( !is.null(n) ) {
+    df <- df %>% head(n)
+  }
   
-  return(ggplot(df, aes(x=reorder(class, -mean), y=mean)) + 
+  
+  var_plot <- ggplot(df, aes(x=reorder(class, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
     geom_line() +
     geom_point() +
     ggtitle(exp@name) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+    ylab('Importance') +
+    xlab('Variable') +
+    theme(
+      axis.text=element_text(size=14),
+      axis.text.x = element_text(angle = 30, hjust = 1),
+      
+    )
+  return( var_plot )
 }
 
-plot_class_importance <- function(exp, variable){
+plot_class_importance <- function(exp, variable, n=NULL){
   pp_veg <- c()
   for(c in 1:length(exp@models)){
     model <- exp@models[[c]]
@@ -87,14 +97,23 @@ plot_class_importance <- function(exp, variable){
   colnames(df) <- c('mean', 'sd')
   df$type <- rownames(df)
   df <- df[order(-df$mean),]
-  df
+  if( !is.null(n) ) {
+    df <- df %>% head(n)
+  }
   
-  return(ggplot(df, aes(x=reorder(type, -mean), y=mean)) + 
+  
+  var_plot <- ggplot(df, aes(x=reorder(type, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
     geom_line() +
     geom_point() +
     ggtitle(exp@name) +
-    theme(axis.text.x = element_text(angle = 30, hjust = 1)))
+    ylab('Importance') +
+    xlab('Class') +
+    theme(
+      axis.text=element_text(size=14),
+      axis.text.x = element_text(angle = 30, hjust = 1)
+    )
+  return(var_plot)
 }
 
 plot_ecdf <- function(raster, BA, add=F, col='black'){

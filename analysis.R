@@ -70,7 +70,7 @@ for (exp in experiments) {
     height=9, 
     pointsize=12
   )
-  print(plot_var_importance(exp))
+  print(plot_var_importance(exp, 15))
   dev.off()
   
   
