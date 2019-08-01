@@ -1,4 +1,7 @@
+# load model functions
 source('R/model_functions.R')
+
+# load analysis functions
 source('R/analysis_functions.R')
 
 resolution = 100
@@ -18,17 +21,17 @@ fires_df$month = month(fires_df$data)
 year_from <- 1997
 year_test <- 2012
 
-source('model.r')
+source('model.R')
 source('analysis.R')
 
 year_from <- 1997
 year_test <- 2016
 
-source('model.r')
+source('model.R')
 source('analysis.R')
 
 year_from <- 2010
 year_test <- 2016
 
-source('model.r')
+source('model.R')
 source('analysis.R')

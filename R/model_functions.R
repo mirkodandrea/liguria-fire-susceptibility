@@ -1,4 +1,4 @@
-# install.packages(c('ModelMetrics', 'Metrics', 'pROC', 'caret', 
+#install.packages(c('ModelMetrics', 'Metrics', 'pROC', 'caret', 
 #                   'randomForest', 'raster', 'dplyr', 'foreign', 
 #                  'maptools', 'randomForest', 'rgdal', 'readxl', 
 #                  'glue', 'caret', 'ModelMetrics', 'Metrics', 
