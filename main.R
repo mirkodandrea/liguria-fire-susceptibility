@@ -17,21 +17,11 @@ fires_df <- SpatialPointsDataFrame(fires_df[c("x", "y")], fires_df)
 fires_df$month = month(fires_df$data)
 
 
-
 year_from <- 1997
 year_test <- 2012
 
-source('model.R')
-source('analysis.R')
+source('R/model.R')
+source('R/analysis.R')
 
 year_from <- 1997
 year_test <- 2016
-
-source('model.R')
-source('analysis.R')
-
-year_from <- 2010
-year_test <- 2016
-
-source('model.R')
-source('analysis.R')
