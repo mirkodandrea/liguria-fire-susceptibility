@@ -1,5 +1,5 @@
 List of variables: 
- - dem
+ - *dem* : height of the pixel from digital elevation model
  - slope
  - north
  - east
