@@ -1,4 +1,3 @@
-
 output_dir <- 'output/{year_from}_{year_test - 1}' %>% g
 dir.create(output_dir, showWarnings = F)
 
@@ -10,7 +9,7 @@ if ( load_data ){
   load(data_file)
 }
 
-# Zonal statistics
+# extract test fires from shapefile
 BA <- readOGR("shapefiles/perimetrazioni_1997_2017.shp")
 BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
 BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
@@ -121,7 +120,7 @@ for (exp in experiments) {
   print("{exp@name} - auc: {mean(exp@auc)} - area: {value}" %>% g)
 }
 
-
+#------------------------------- Build test dataset to check RMSE ---------------------------------#
 dataset_w <- build_dataset(points_df, fires_df, 1, year_test, 9999)
 test_dataset_w <- select_pseudo_absences(dataset_w@data, dataset_w@data$fire == 1)
 

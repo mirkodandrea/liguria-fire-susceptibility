@@ -1,8 +1,3 @@
-
-
-
-
-
 data_file <- 'output/RF_{year_from}_{year_test - 1}.RData' %>% g
 
 all_cols <- names(points_df)

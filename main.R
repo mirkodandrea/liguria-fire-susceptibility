@@ -22,6 +22,3 @@ year_test <- 2012
 
 source('R/model.R')
 source('R/analysis.R')
-
-year_from <- 1997
-year_test <- 2016
