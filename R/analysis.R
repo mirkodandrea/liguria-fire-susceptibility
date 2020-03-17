@@ -1,6 +1,6 @@
-output_dir <- 'output_puglia/{year_from}_{year_test - 1}' %>% g
-dir.create(output_dir, showWarnings = F)
 
+dir.create(output_dir, showWarnings = F)
+vegetation_string = "veg" #"veg_type"
 load_data <- F
 do_class_imp <- T
 
@@ -18,18 +18,18 @@ experiments <- c(
   onefold_std_w,
   onefold_perc_w,
   # onefold_freq_w,
-  fivefolds_std_w,
-  fivefolds_perc_w,
+  #fivefolds_std_w,
+  #fivefolds_perc_w,
   # fivefolds_freq_w,
-  ninefolds_perc_w,
+  #ninefolds_perc_w,
   
   onefold_std_s,
-  onefold_perc_s,
+  onefold_perc_s
   # onefold_freq_s,
-  fivefolds_std_s,
-  fivefolds_perc_s,
+  #fivefolds_std_s,
+  #fivefolds_perc_s,
   # fivefolds_freq_s,
-  ninefolds_perc_s
+  #ninefolds_perc_s
 )
 
 for (exp in experiments) {
@@ -75,7 +75,7 @@ for (exp in experiments) {
   
   if (do_class_imp){
     svg(filename = "{out_dir}/class_imp_type.svg" %>% g)
-    print(plot_class_importance(exp, 'veg_type'))
+    print(plot_class_importance(exp, vegetation_string))
     dev.off()
   
     if ( 'veg_freq' %in% exp@columns ){

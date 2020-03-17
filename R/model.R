@@ -1,5 +1,5 @@
 # the file where the output in  R format will be saved is here defined.
-data_file <- 'output_puglia/RF_{year_from}_{year_test - 1}.RData' %>% g
+data_file <- '{output_dir}/RF_{year_from}_{year_test - 1}.RData' %>% g
 
 #the input factor names are given by the names() of the dataframe of points. 
 # among  them, the ones representing convoluted information (information on neighbours) are
@@ -7,11 +7,16 @@ data_file <- 'output_puglia/RF_{year_from}_{year_test - 1}.RData' %>% g
 all_cols <- names(points_df)
 perc_cols <- all_cols %>% subset(all_cols %>% startsWith("perc_"))
 
-
+if(is_Liguria){
+excluded_cols_base <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq")
+}else{
+excluded_cols <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+}
 
 # from here onwards, we try different folding cross validation  nfolds = 1, 5 or 9.
 # for every fold number, we can consider or exclude the neighbourhood (perc_cols) in the variable selection. 
-# The variables  "row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq" must be always discarded. 
+# The variables  "row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq" must be always discarded for Sicilia and Puglia.
+# For Liguria, the variable "veg" must be discarded instead of veg_type 
 # 
 # 
 # 

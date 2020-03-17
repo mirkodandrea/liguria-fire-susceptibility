@@ -4,6 +4,13 @@ source('R/model_functions.R')
 # load analysis functions
 source('R/analysis_functions.R')
 
+###### SETTING THE  EXPERIMENT #######
+###### If we want to practice with Liguria region instead of 
+###### going through the project (Puglia or Sicilia), the 
+###### variable is_Liguria needs to be set to True (T)
+
+is_Liguria = F 
+
 ############### SPATIAL RESOLUTION AND CROSS VALIDATION RESOLUTION
 # the spatial resolution  of the map. Default: 100 m
 resolution = 100
@@ -25,8 +32,14 @@ nodesize <- 60
 
 # loading  the data
 # we  define the data directory, we read the geographical and fire  occurrence data bases 
-data_dir = 'puglia_trial'
-#data_dir = 'data_{resolution}m' %>% g
+
+if (is_Liguria) {
+  data_dir = 'data_{resolution}m' %>% g
+} else {
+  data_dir = 'puglia_trial'
+  
+}
+
 points_df <- read.csv('{data_dir}/points.csv' %>% g, row.names="point_index")
 points_df <- SpatialPointsDataFrame(points_df[c("x", "y")], points_df)
 fires_df <- read.csv('{data_dir}/fires.csv' %>% g)
@@ -41,5 +54,17 @@ year_from <-  2007
 year_test <- 2015
 #puglia data  from 2007 to 2017,  year test 2015  
 #the ML model is built and analysis is performed.  
+#
+#
+#
+#
+#NOW  WE DEFINE THE OUTPUT FOLDER WHERE RESULTS WILL BE SAVED
+#
+#
+if(is_Liguria){
+  output_dir <- 'output/{year_from}_{year_test - 1}' %>% g
+}else{
+  output_dir <- 'output_puglia/{year_from}_{year_test - 1}' %>% g
+}
 source('R/model.R')
 source('R/analysis.R')

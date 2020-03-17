@@ -61,8 +61,7 @@ plot_var_importance <- function(exp, n=NULL){
   if( !is.null(n) ) {
     df <- df %>% head(n)
   }
-  write.csv(df,  'variable_importance_{exp@name}.csv' %>% g)   
-  
+  write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g)   
   var_plot <- ggplot(df, aes(x=reorder(class, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
     geom_line() +
@@ -86,8 +85,8 @@ plot_class_importance <- function(exp, variable, n=NULL){
     
     pP_params <- list(x=model,  pred.data=tr, 
                       x.var=variable, which.class="1", plot=F) 
-    pp_veg[[c]] <- do.call("partialPlot", pP_params) %>%
-      as.data.frame(., row.names='x') 
+    #pp_veg[[c]] <- do.call("partialPlot", pP_params) %>%
+    #  as.data.frame(., row.names='x') # NO PLOT IN RSTUDIO!!
   }
   pp_veg <- abind(pp_veg, along=3)
   pp_veg_mean <- apply(pp_veg, c(1,2), mean)
@@ -100,7 +99,7 @@ plot_class_importance <- function(exp, variable, n=NULL){
   if( !is.null(n) ) {
     df <- df %>% head(n)
   }
-  write.csv(df,  'class_importance_{exp@name}.csv' %>% g)   
+  write.csv(df,  '{output_dir}/vclass_importance_{exp@name}.csv' %>% g)   
   
   var_plot <- ggplot(df, aes(x=reorder(type, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
