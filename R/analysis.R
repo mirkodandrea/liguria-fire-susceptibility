@@ -1,4 +1,4 @@
-output_dir <- 'output/{year_from}_{year_test - 1}' %>% g
+output_dir <- 'output_puglia/{year_from}_{year_test - 1}' %>% g
 dir.create(output_dir, showWarnings = F)
 
 load_data <- F

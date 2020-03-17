@@ -61,7 +61,7 @@ plot_var_importance <- function(exp, n=NULL){
   if( !is.null(n) ) {
     df <- df %>% head(n)
   }
-  
+  write.csv(df,  'variable_importance_{exp@name}.csv' %>% g)   
   
   var_plot <- ggplot(df, aes(x=reorder(class, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
@@ -100,7 +100,7 @@ plot_class_importance <- function(exp, variable, n=NULL){
   if( !is.null(n) ) {
     df <- df %>% head(n)
   }
-  
+  write.csv(df,  'class_importance_{exp@name}.csv' %>% g)   
   
   var_plot <- ggplot(df, aes(x=reorder(type, -mean), y=mean)) + 
     geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2) +
