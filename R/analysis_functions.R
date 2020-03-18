@@ -85,8 +85,8 @@ plot_class_importance <- function(exp, variable, n=NULL){
     
     pP_params <- list(x=model,  pred.data=tr, 
                       x.var=variable, which.class="1", plot=F) 
-    #pp_veg[[c]] <- do.call("partialPlot", pP_params) %>%
-    #  as.data.frame(., row.names='x') # NO PLOT IN RSTUDIO!!
+    pp_veg[[c]] <- do.call("partialPlot", pP_params) %>%
+      as.data.frame(., row.names='x') # NO PLOT IN RSTUDIO!!
   }
   pp_veg <- abind(pp_veg, along=3)
   pp_veg_mean <- apply(pp_veg, c(1,2), mean)

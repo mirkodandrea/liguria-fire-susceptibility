@@ -1,29 +1,31 @@
 
 dir.create(output_dir, showWarnings = F)
-vegetation_string = "veg" #"veg_type"
-load_data <- F
-do_class_imp <- T
 
-if ( load_data ){
-  data_file <- 'output/RF_{year_from}_{year_test - 1}.RData' %>% g
-  load(data_file)
+load_data <- F
+do_class_imp <- F
+
+
+
+if(is_Liguria){
+  shapes_dir = 'shapefiles'
+  vegetation_string = "veg_type" 
+  
+}else{
+  shapes_dir = '{region_name}_shapefiles' %>% g
+  vegetation_string = "veg" 
 }
 
-# extract test fires from shapefile
-BA <- readOGR("shapefiles/perimetrazioni_1997_2017.shp")
-BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
-BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
 
+### PLEASE SELECT ONLY THE EXPERIMENTS THAT HAVE BEEN DEFINED  IN  model.R
 experiments <- c(
-  onefold_std_w,
+  #onefold_std_w,
   onefold_perc_w,
   # onefold_freq_w,
   #fivefolds_std_w,
   #fivefolds_perc_w,
   # fivefolds_freq_w,
   #ninefolds_perc_w,
-  
-  onefold_std_s,
+  #onefold_std_s,
   onefold_perc_s
   # onefold_freq_s,
   #fivefolds_std_s,
@@ -31,6 +33,29 @@ experiments <- c(
   # fivefolds_freq_s,
   #ninefolds_perc_s
 )
+
+# years of analysis 
+year_1 = 2007
+year_2 = 2017
+
+
+
+
+
+
+if ( load_data ){
+  data_file <- 'output/RF_{year_from}_{year_test - 1}.RData' %>% g
+  load(data_file)
+}
+
+# extract test fires from shapefile
+BA <- readOGR("{shapes_dir}/perimetrazioni_1997_2017.shp"  %>% g)
+BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
+BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+
+
+
+
 
 for (exp in experiments) {
   writeRaster(exp@raster, "{output_dir}/{exp@name}.tiff" %>% g, overwrite = TRUE)
@@ -89,7 +114,7 @@ for (exp in experiments) {
 
 df_performances <- data.frame()
 df_area_Y <- data.frame()
-for(year in seq(1997, 2017)){
+for(year in seq(year_1, year_2)){
   BA_test_w <- BA[((BA$stagione==1) & (BA$anno == year)), ]
   BA_test_s <- BA[((BA$stagione==2) & (BA$anno == year)), ]
   for (exp in experiments) {
@@ -110,8 +135,8 @@ for(year in seq(1997, 2017)){
   }
 }
 
-write.csv(df_performances[1997:2017, ], file = '{output_dir}/performances.csv' %>% g)
-write.csv(df_area_Y[1997:2017, ], file = '{output_dir}/area_Y.csv' %>% g)
+write.csv(df_performances[year_1:year_2, ], file = '{output_dir}/performances.csv' %>% g)
+write.csv(df_area_Y[year_1:year_2, ], file = '{output_dir}/area_Y.csv' %>% g)
 
 for (exp in experiments) {
   raster_vals <- exp@raster@data@values
