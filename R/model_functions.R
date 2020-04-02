@@ -4,6 +4,7 @@
 #                  'glue', 'caret', 'ModelMetrics', 'Metrics', 
 #                  'pROC', 'raster', 'plyr', 'ggplot2', 'sp', 'plyr', 'raster','e1071'))
 
+library(wsrf)
 
 library(plyr)
 library(dplyr)
@@ -167,7 +168,7 @@ train_single_fold <- function(dataset, test_ratio=0.2, columns, model, ...) {
                      newdata = TS[, names(TS) != "fire"],
                      type = "prob")
 
-  TS_roc <- roc(TS$fire, pred_TS[, 2])
+  TS_roc <- roc(TS$fire, pred_TS$prob)   #roc(TS$fire, pred_TS[, 2])
   TS_auc <- auc(TS_roc)
   print("AUC: {TS_auc}"%>%g)
   RFS <- c(); RFS[[1]] <- RF
@@ -203,7 +204,7 @@ train_on_folds <- function(dataset, folds, columns, model, ...) {
                        type = "prob")
       
     tryCatch({
-      TS_roc <- roc(TS$fire, pred_TS[, 2])
+      TS_roc <- roc(TS$fire, pred_TS$prob)   #pred_TS[, 2])
       TS_auc <- auc(TS_roc)
       
       print("AUC: {TS_auc}" %>% g)
@@ -289,11 +290,11 @@ do_experiment <- function(
   all_cols <- names(points_df)
   used_cols <- subset(all_cols, !all_cols %in% excluded_cols)
   mtry <- ceiling(sqrt(length(used_cols)))
-  
+  #    model = randomForest,      
   list[RFS, AUC, TR, TS] <- build_and_train(
     points_df, fires_df, excluded_cols, season, 
     year_from, year_test, box_dimension, nfolds,
-    model = randomForest, 
+    model = wsrf,        
     mtry = mtry, ntree = ntree, nodesize = nodesize,
     do.trace = T, importance = TRUE, type = "prob")
   

@@ -19,7 +19,7 @@ if(is_Liguria){
 ### PLEASE SELECT ONLY THE EXPERIMENTS THAT HAVE BEEN DEFINED  IN  model.R
 experiments <- c(
   #onefold_std_w,
-  onefold_perc_w,
+  #onefold_perc_w,
   # onefold_freq_w,
   #fivefolds_std_w,
   #fivefolds_perc_w,
@@ -28,7 +28,7 @@ experiments <- c(
   #onefold_std_s,
   onefold_perc_s
   # onefold_freq_s,
-  #fivefolds_std_s,
+  #fivefolds_std_s
   #fivefolds_perc_s,
   # fivefolds_freq_s,
   #ninefolds_perc_s

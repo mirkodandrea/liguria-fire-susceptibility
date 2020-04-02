@@ -27,11 +27,11 @@ box_dimension <- 15000
 ######   PARAMETERS  FOR RANDOM  FOREST ##########
 ##################################################
 # ntree  is the number of the trees used by the RandomForest algorithm. default = 750
-ntree <- 100
+ntree <- 750 #100 
 #nodesize is Minimum size of terminal nodes. 
 #Setting this number larger causes smaller trees to be grown (and thus take less time).
 #Setting this number larger may affect overall accuracy of the method. default = 50
-nodesize <- 60
+nodesize <- 50 #60
 
 
 
