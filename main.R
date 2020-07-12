@@ -14,7 +14,7 @@ is_Liguria <- F
 # please select your region, 'puglia' or 'sicilia'
 #  
 
-region_name = 'puglia'
+region_name = 'molise'
 
 ############### SPATIAL RESOLUTION AND CROSS VALIDATION RESOLUTION
 # the spatial resolution  of the map. Default: 100 m
@@ -27,7 +27,7 @@ box_dimension <- 15000
 ######   PARAMETERS  FOR RANDOM  FOREST ##########
 ##################################################
 # ntree  is the number of the trees used by the RandomForest algorithm. default = 750
-ntree <- 100
+ntree <- 750
 #nodesize is Minimum size of terminal nodes. 
 #Setting this number larger causes smaller trees to be grown (and thus take less time).
 #Setting this number larger may affect overall accuracy of the method. default = 50
@@ -57,7 +57,7 @@ fires_df$month = month(fires_df$data)
 # The years from year_test to the end of the available database are used for testing.
 #default  year from 1997  year test 2012 
 year_from <-  2007 
-year_test <- 2015
+year_test <- 2016   #1997 2018
 #puglia data  from 2007 to 2017,  year_from  2007 year_test = 2015
 #sicilia data from 2007 to 2017,  year_from = 2007, year_test = 2015  
 #the ML model is built and analysis is performed.  

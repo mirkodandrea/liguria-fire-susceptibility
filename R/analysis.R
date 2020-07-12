@@ -19,14 +19,14 @@ if(is_Liguria){
 ### PLEASE SELECT ONLY THE EXPERIMENTS THAT HAVE BEEN DEFINED  IN  model.R
 experiments <- c(
   #onefold_std_w,
-  onefold_perc_w,
+  onefold_perc_w
   # onefold_freq_w,
   #fivefolds_std_w,
   #fivefolds_perc_w,
   # fivefolds_freq_w,
   #ninefolds_perc_w,
   #onefold_std_s,
-  onefold_perc_s
+  #onefold_perc_s
   # onefold_freq_s,
   #fivefolds_std_s,
   #fivefolds_perc_s,
@@ -36,7 +36,7 @@ experiments <- c(
 
 # years of analysis 
 year_1 = 2007
-year_2 = 2017
+year_2 = 2018
 
 
 
@@ -49,9 +49,12 @@ if ( load_data ){
 }
 
 # extract test fires from shapefile
-BA <- readOGR("{shapes_dir}/perimetrazioni_1997_2017.shp"  %>% g)
+BA <- readOGR("{shapes_dir}/incendi_2007_2018_33.shp"  %>% g)
+BA$anno = as.numeric(BA$anno)
+BA$stagione = as.numeric(BA$stagione)
 BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
 BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+
 
 
 

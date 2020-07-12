@@ -61,19 +61,19 @@ excluded_cols <- c(excluded_cols_base, perc_cols)
 season <- 1
 name <- 'onefold_std_w'
 
-onefold_std_w <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
+#onefold_std_w <- do_experiment(
+#  points_df, fires_df, excluded_cols, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+#)
 
 season <- 2
-name <- 'onefold_std_s'
-onefold_std_s <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
+#name <- 'onefold_std_s'
+#onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+##)
 
 #-------------------------------------------------------------------------------
 # perc
@@ -91,13 +91,13 @@ onefold_perc_w <- do_experiment(
   mtry, ntree, nodesize, name, resolution
 )
 
-season <- 2
-name <- 'onefold_perc_s'
-onefold_perc_s <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
+#season <- 2
+#name <- 'onefold_perc_s'
+#onefold_perc_s <- do_experiment(
+#  points_df, fires_df, excluded_cols, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+#)
 
 
 #-------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ save(
   #ninefolds_perc_w,
   
   #onefold_std_s,
-  onefold_perc_s,
+  #onefold_perc_s,
   # onefold_freq_s,
   #fivefolds_std_s,
   #fivefolds_perc_s,
