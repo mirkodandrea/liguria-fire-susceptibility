@@ -4,6 +4,7 @@
 #                  'glue', 'caret', 'ModelMetrics', 'Metrics', 
 #                  'pROC', 'raster', 'plyr', 'ggplot2', 'sp', 'plyr', 'raster','e1071'))
 
+#install.packages("RSNNS",  "randomUniformForest", "NeuralNetTools")
 
 library(plyr)
 library(dplyr)
@@ -32,6 +33,14 @@ library(abind)
 
 library(e1071)
 
+# Aggiunte  AT per  multi-algorithm
+# 
+library("randomUniformForest")
+library("RSNNS")
+#library("NeuralNetTools")
+
+
+
 g <- glue
 
 
@@ -46,7 +55,8 @@ slots=list(
  season="numeric",
  nfolds="numeric",
  columns="character",
- name="character"
+ name="character",
+ algo="character"
 ))
 
 
@@ -161,7 +171,7 @@ train_single_fold <- function(dataset, test_ratio=0.2, columns, model, ...) {
   TR = TR[, columns]
   TS = TS[, columns]
   
-  RF <- model(fire~., TR, ...)
+  #RF <- model(fire~., TR, ...)
 
   pred_TS <- predict(object = RF,
                      newdata = TS[, names(TS) != "fire"],
@@ -284,18 +294,55 @@ build_and_train <- function(points_df, fires_df, excluded_cols, season,
 do_experiment <- function(
   points_df, fires_df, excluded_cols, season, 
   year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
+  mtry, ntree, nodesize, name, resolution, algo
 ){
   all_cols <- names(points_df)
   used_cols <- subset(all_cols, !all_cols %in% excluded_cols)
   mtry <- ceiling(sqrt(length(used_cols)))
   
-  list[RFS, AUC, TR, TS] <- build_and_train(
-    points_df, fires_df, excluded_cols, season, 
-    year_from, year_test, box_dimension, nfolds,
-    model = randomForest, 
-    mtry = mtry, ntree = ntree, nodesize = nodesize,
-    do.trace = T, importance = TRUE, type = "prob")
+  
+  if (algo = "randomForest") {
+    
+    list[RFS, AUC, TR, TS] <- build_and_train(
+      points_df, fires_df, excluded_cols, season, 
+      year_from, year_test, box_dimension, nfolds,
+      model = randomForest, 
+      mtry = mtry, ntree = ntree, nodesize = nodesize,
+      do.trace = T, importance = TRUE, type = "prob")  
+    
+    
+  } else if (algo = "randomUniformForest") {
+    
+    list[RFS, AUC, TR, TS] <- build_and_train(
+      points_df, fires_df, excluded_cols, season, 
+      year_from, year_test, box_dimension, nfolds,
+      model = randomForest, 
+      mtry = mtry, ntree = ntree, nodesize = nodesize,
+      do.trace = T, importance = TRUE, type = "prob") 
+    
+  } else if (algo = "mlp") {
+
+    list[RFS, AUC, TR, TS] <- build_and_train(
+      points_df, fires_df, excluded_cols, season, 
+      year_from, year_test, box_dimension, nfolds,
+      model = mlp, 
+      mtry = mtry, ntree = ntree, nodesize = nodesize,
+      do.trace = T, importance = TRUE, type = "prob") 
+    
+  } else{
+    print("Algorithm label not read properly. Using randomForest instead.")
+
+    list[RFS, AUC, TR, TS] <- build_and_train(
+      points_df, fires_df, excluded_cols, season, 
+      year_from, year_test, box_dimension, nfolds,
+      model = randomForest, 
+      mtry = mtry, ntree = ntree, nodesize = nodesize,
+      do.trace = T, importance = TRUE, type = "prob") 
+    
+    
+    }
+  
+
   
   f <- fit_points(points_df, excluded_cols, RFS)
   
@@ -306,7 +353,7 @@ do_experiment <- function(
   ret <- new('experiment',
              models = RFS, auc = AUC, tr = TR, ts = TS,
              raster = r, season = season, nfolds = nfolds,
-             columns = used_cols, name = name
+             columns = used_cols, name = name, algo = algo
   )
   
   return(ret)

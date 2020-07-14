@@ -9,7 +9,7 @@ source('R/analysis_functions.R')
 ###### going through the project (Puglia or Sicilia), the 
 ###### variable is_Liguria needs to be set to True (T), otherwise to False (F)
 
-is_Liguria <- F 
+is_Liguria <- T 
 
 # please select your region, 'puglia' or 'sicilia'
 #  
@@ -46,7 +46,7 @@ if (is_Liguria) {
 }
 
 # we read the geographical points info (points.csv) and the fire info (fires.csv)
-points_df <- read.csv('{data_dir}/points.csv' %>% g, row.names="point_index")
+points_df <- read.csv('{data_dir}/points_new_veg.csv' %>% g, row.names="point_index")
 points_df <- SpatialPointsDataFrame(points_df[c("x", "y")], points_df)
 fires_df <- read.csv('{data_dir}/fires.csv' %>% g)
 fires_df <- SpatialPointsDataFrame(fires_df[c("x", "y")], fires_df)
