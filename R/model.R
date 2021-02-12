@@ -15,14 +15,27 @@ data_file <- '{output_dir}/RF_{year_from}_{year_test - 1}.RData' %>% g
 all_cols <- names(points_df)
 perc_cols <- all_cols %>% subset(all_cols %>% startsWith("perc_"))
 
-
+# FOR SARA: PLEASE CHECK 
 # if you want to exclude  some variable in the ML algorithm, you can 
 # change the content of excluded_cols_base, for the Liguria case or the Sicilia-Puglia case,
 # respectively. 
-if(is_Liguria){
-excluded_cols_base <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq")
+if(is_Liguria){              #database liguria non ha veg, ha veg_type... nel dubbio elimino anche il veg. 
+  excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new") 
+  excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new")
+  excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new")
+  excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new", perc_cols)
+  excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new", perc_cols)
+  excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type","veg", "veg_freq_new") 
+  excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type","veg", "veg_freq_new") 
 }else{
-excluded_cols_base <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+  excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+  excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+  excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+  excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
+  excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
+  excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq") 
+  excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq")
+  #excluded_cols_base        <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
 }
 
 # from here onwards, we try different folding cross validation  nfolds = 1, 5 or 9.
@@ -48,60 +61,193 @@ excluded_cols_base <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "v
 # If you want to remember a single model test, it is  a good practice to change   the first part of  the name, e.g. 
 # name <- 'my_experiment_onefold_std_w'
 #  
+
+
+
+if(batch_test == TRUE){
+  results_list = list()
+  nfold_l = c(1,5)#c(1,5)
+  algo_l = c("mlp_rminer") #c("randomForest","svm","mlp_rminer")
+  season_l = c(1,2)#c(1,2)
+  print("Ciao")
+  print("")
+  prod = product(nfolds= nfold_l, algo = algo_l, season= season_l)
+  
+  it <- ihasNext(prod)
+  it_no = 1 
+  while (hasNext(it)){
+    param <- nextElem(it)
+    #cat(sprintf('a = %d, b = %d\n', x$a, x$b))}   name <- 'ruf_onefold_std_s'
+    name_string = paste( param$algo,
+                 param$nfolds%>%as.character() ,"fold",
+                 "std","sea",
+                 param$season%>%as.character(), sep="_")
+    # for liguria (with  no neighbouring) just two options:
+    # to use vegetation like in rf and ruf, or to use
+    # neighboring as vegetation (mlp and svm)
+    if(param$algo %in% c("randomForest", "ruf")){   
+    my_excluded_cols =excluded_cols_base_rf_nop
+    }else{
+    my_excluded_cols = excluded_cols_base_mlp
+    } 
+      print("algo is ...")
+      print(param$algo)
+      print("nfold is ")
+      print(param$nfolds)
+      print("season is...")
+      print(param$season)
+      print("name is...")
+      print(name_string)
+      experiment_t =   do_experiment(
+      points_df, fires_df, my_excluded_cols, param$season, 
+      year_from, year_test, box_dimension, param$nfolds,
+      mtry, ntree, nodesize, name_string, resolution,param$algo, name_string
+    ) 
+    #assign(name_string,experiment_t)
+    #eval(parse(text =" paste(risultati[it_no] <- name_string    )"))
+    results_list[it_no]  <- experiment_t 
+    it_no <- it_no+1
+  }  
+  
+  
+}else{
+
+
+
+
+
+
+
+
+
 # ------------------------------------------------------------------------ #
 nfolds <- 1
+#-------------------------------------------------------------------------------
+# perc
+# select columns
+# 
 
+
+season <- 2
+name <- 'onefolds_std_w'
+
+#onefold_std_w <- do_experiment(
+# points_df, fires_df, excluded_cols, season, 
+# year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+#)
+
+season <- 2
+
+algo="ruf"
+name <- 'ruf_onefold_std_s'
+#ruf_onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_ruf, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+name <- 'ruf_nop_onefold_std_s'
+#ruf_nop_onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_ruf_nop, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+
+algo="svm"
+name <- 'svm_onefold_std_s'
+
+#svm_onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_svm, season, #points_df
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#  )
+
+algo = "mlp_rminer"
+name <- 'mlpr_onefold_std_s'
+#mlpr_onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_mlp, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+algo="rf"
+name <- 'rf_onefold_std_s'
+#rf_onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_rf, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+
+
+name <- 'rf_nop_onefold_std_s'
+
+#rf_nop_onefold_std_s <- do_experiment(
+#  points_df, fires_df,excluded_cols_base_rf_nop, season, #points_df
+#    year_from, year_test, box_dimension, nfolds,
+#    mtry, ntree, nodesize, name, resolution,algo
+#)
+
+algo="mlp"
+name <- 'mlp_onefold_std_s'
+#mlp_onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_mlp, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+
+
+# 
 #-------------------------------------------------------------------------------
 # no perc
 # select columns
 
+excluded_cols <- excluded_cols_base
 
+season <- 1
+name <- 'fivefolds_perc_w'
+
+#fivefolds_perc_w <- do_experiment(
+# points_df, fires_df, excluded_cols, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+#)
+
+season <- 2
+name <- 'fivefolds_perc_s'
+#fivefolds_perc_s <- do_experiment(
+#  points_df, fires_df, excluded_cols, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+#)---------------
 excluded_cols <- c(excluded_cols_base, perc_cols)
 
 season <- 1
 name <- 'onefold_std_w'
 
-onefold_std_w <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
+#onefold_std_w <- do_experiment(
+#  points_df, fires_df, excluded_cols, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution
+#)
 
 season <- 2
 name <- 'onefold_std_s'
-onefold_std_s <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
+algo = "svm"
 
-#-------------------------------------------------------------------------------
-# perc
-# select columns
-# 
-# 
-excluded_cols <- excluded_cols_base
+#onefold_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_svm, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, 
+#  ntree, nodesize, name, resolution, algo
+#)
 
-season <- 1
-name <- 'onefold_perc_w'
-
-onefold_perc_w <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
-
-season <- 2
-name <- 'onefold_perc_s'
-onefold_perc_s <- do_experiment(
-  points_df, fires_df, excluded_cols, season, 
-  year_from, year_test, box_dimension, nfolds,
-  mtry, ntree, nodesize, name, resolution
-)
 
 
 #-------------------------------------------------------------------------------
-nfolds <- 5
+nfolds <- 5# debug 
 #-------------------------------------------------------------------------------
 # no perc
 # select columns
@@ -118,12 +264,65 @@ name <- 'fivefolds_std_w'
 #)
 
 season <- 2
-name <- 'fivefolds_std_s'
-#fivefolds_std_s <- do_experiment(
- # points_df, fires_df, excluded_cols, season, 
- # year_from, year_test, box_dimension, nfolds,
-#  mtry, ntree, nodesize, name, resolution
+
+algo="ruf"
+name <- 'ruf_fivefolds_std_s'
+#ruf_fivefolds_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_ruf, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
 #)
+name <- 'ruf_nop_fivefolds_std_s'
+#ruf_nop_fivefolds_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_ruf_nop, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+
+algo="svm"
+name <- 'svm_fivefolds_std_s'
+
+#svm_fivefolds_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_svm, season, #points_df
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+algo = "mlp_rminer"
+name <- 'mlpr_fivefolds_std_s'
+#mlpr_fivefolds_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_mlp, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+algo="rf"
+name <- 'rf_fivefolds_std_s'
+rf_fivefolds_std_s <- do_experiment(
+  points_df, fires_df, excluded_cols_base_rf, season, 
+  year_from, year_test, box_dimension, nfolds,
+  mtry, ntree, nodesize, name, resolution,algo
+)
+
+
+
+name <- 'rf_nop_fivefolds_std_s'
+#rf_nop_fivefolds_std_s <- do_experiment(
+#  points_df, fires_df,excluded_cols_base_rf_nop, season, #points_df
+#    year_from, year_test, box_dimension, nfolds,
+#    mtry, ntree, nodesize, name, resolution,algo
+#)
+
+algo="mlp"
+name <- 'mlp_fivefolds_std_s'
+#mlp_fivefolds_std_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_mlp, season, 
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo
+#)
+
+
 
 
 #-------------------------------------------------------------------------------
@@ -173,6 +372,38 @@ name <- 'ninefolds_perc_s'
 #  year_from, year_test, box_dimension, nfolds,
 #  mtry, ntree, nodesize, name, resolution
 #)
+#
+#AT: HERE I PUT THE NEWEST ALGORITHMS...
+#
+#
+#kernel support vector machine
+season <- 2
+name <- 'onefold_ksvm_s'
+nfolds <- 1
+algo = 'svm'
+#FR mangia matrici, mentre l'altro df
+
+#onefold_ksvm_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_svm, season, #stagione sempre 2
+#  year_from, year_test, box_dimension, nfolds,
+#  mtry, ntree, nodesize, name, resolution,algo#tipo di algoritmo
+#)
+#...gli mangia tutto 
+
+
+
+season <- 2
+name <- 'onefold_mlp_s'#multi layer perceptron
+nfolds <- 1
+algo <- "mlp"
+#onefold_mlp_s <- do_experiment(
+#  points_df, fires_df, excluded_cols_base_mlp, season, 
+#  year_from, year_test, box_dimension, nfolds,
+ # mtry, ntree, nodesize, name, resolution,algo
+#)
+
+
+}
 
 ##################################################
 ##################################################
@@ -183,9 +414,14 @@ name <- 'ninefolds_perc_s'
 #           further R  reanalyses.               
 ##################################################
 
+if(batch_test == TRUE){
+  #save list
+  save(results_list, file = data_file)
+  
+}else{
 save(
   #onefold_std_w,
-  onefold_perc_w,
+  #onefold_perc_w,
   # onefold_freq_w,
   #fivefolds_std_w,
   #fivefolds_perc_w,
@@ -193,13 +429,29 @@ save(
   #ninefolds_perc_w,
   
   #onefold_std_s,
-  onefold_perc_s,
+  #onefold_perc_s,
   # onefold_freq_s,
-  #fivefolds_std_s,
+  #ruf_fivefolds_std_s,
+  #ruf_nop_fivefolds_std_s,
+  #svm_fivefolds_std_s,
+  #mlpr_fivefolds_std_s,
+  rf_fivefolds_std_s,
+  #rf_nop_fivefolds_std_s,
+  #mlp_fivefolds_std_s,
   #fivefolds_perc_s,
   # fivefolds_freq_s,
   #ninefolds_perc_s,
+  #onefold_ksvm_s,
+  #onefold_mlp_s,
+  #ruf_onefold_std_s,
+  #ruf_nop_onefold_std_s,
+  #svm_onefold_std_s,
+  #mlpr_onefold_std_s,
+  #rf_onefold_std_s,
+  #rf_nop_onefold_std_s,
+  #mlp_onefold_std_s,
 
   file = data_file
 )
 
+}
