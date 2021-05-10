@@ -352,8 +352,8 @@ test_experiment <- function(exp, test_dataset){
   }else{
       pred <- predict(
       object = m, 
-      newdata = test_dataset[, exp@columns])#,type = "prob")
-      #RMINER 1.3.1 issue -> remove type = prob 
+      newdata = test_dataset[, exp@columns],type = "prob")
+      #RMINER 1.3.1 issue -> remove type = prob   pero' su randomForest  ci va il type = prob...
     
   }
     if(exp@algo == "ruf"){

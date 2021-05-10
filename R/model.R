@@ -19,23 +19,42 @@ perc_cols <- all_cols %>% subset(all_cols %>% startsWith("perc_"))
 # if you want to exclude  some variable in the ML algorithm, you can 
 # change the content of excluded_cols_base, for the Liguria case or the Sicilia-Puglia case,
 # respectively. 
-if(is_Liguria){              #database liguria non ha veg, ha veg_type... nel dubbio elimino anche il veg. 
-  excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new") 
-  excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new")
-  excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new")
-  excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new", perc_cols)
-  excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new", perc_cols)
-  excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type","veg", "veg_freq_new") 
-  excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type","veg", "veg_freq_new") 
-}else{
-  excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
-  excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
-  excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
-  excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
-  excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
-  excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq") 
-  excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq")
-  #excluded_cols_base        <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+  if(is_Liguria){              #database liguria non ha veg, ha veg_type... nel dubbio elimino anche il veg. 
+    excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new") 
+    excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new")
+    excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new")
+    excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new", perc_cols)
+    excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg", "veg_freq_new", perc_cols)
+    excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type","veg", "veg_freq_new") 
+    excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type","veg", "veg_freq_new") 
+  }else if(is_Liguria_s | is_Sicilia_s|is_Liguria_Sicilia){
+    excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+    excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+    excluded_cols_base_rf_xy   <- c("row", "col", "box", "veg_agg", "veg_type", "veg_freq")
+    excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+    # this one below is "std_"
+    excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols)
+    # this one below is "std_xy_"
+    excluded_cols_base_rf_xy_nop <- c("row", "col", "box", "veg_agg", "veg_type", "veg_freq", perc_cols)
+    excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
+    excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq") 
+    excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq")
+    
+  }else if(is_Bulgaria){
+    excluded_cols_base_rf_bg           <- c("point_index", "row", "col", "box", "veg_mask", "veg_freq", perc_cols)
+    excluded_cols_base_no_clim_rf_bg   <- c("point_index", "prec", "temp", "row", "col", "box", "veg_mask", "veg_freq", perc_cols)
+    excluded_cols_base_xy_rf_bg        <- c('x', 'y', "point_index", "row", "col", "box", "veg_mask", "veg_freq", perc_cols)
+    excluded_cols_base_nothing_rf_bg   <- c('x', 'y', "point_index", "prec", "temp", "row", "col", "box", "veg_mask", "veg_freq", perc_cols)
+    
+  }else{
+    excluded_cols_base         <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+    excluded_cols_base_rf      <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+    excluded_cols_base_ruf     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
+    excluded_cols_base_rf_nop  <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
+    excluded_cols_base_ruf_nop <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq", perc_cols) 
+    excluded_cols_base_mlp     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq") 
+    excluded_cols_base_svm     <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg",     "veg_freq")
+    #excluded_cols_base        <- c("row", "col", "x", "y", "box", "veg_agg", "veg_type", "veg_freq")
 }
 
 # from here onwards, we try different folding cross validation  nfolds = 1, 5 or 9.
@@ -66,11 +85,11 @@ if(is_Liguria){              #database liguria non ha veg, ha veg_type... nel du
 
 if(batch_test == TRUE){
   results_list = list()
-  nfold_l = c(1,5)#c(1,5)
-  algo_l = c("mlp_rminer") #c("randomForest","svm","mlp_rminer")
-  season_l = c(1,2)#c(1,2)
-  print("Ciao")
-  print("")
+  nfold_l = c(5)#c(1,5)
+  algo_l = c("randomForest") #c("randomForest","svm","mlp_rminer")
+  season_l = c(2)#c(1,2)
+  type = "nothing" #can be 'std', 'perc', 'xy' or 'xy_perc + % rows if not 99.99% 
+  
   prod = product(nfolds= nfold_l, algo = algo_l, season= season_l)
   
   it <- ihasNext(prod)
@@ -80,13 +99,15 @@ if(batch_test == TRUE){
     #cat(sprintf('a = %d, b = %d\n', x$a, x$b))}   name <- 'ruf_onefold_std_s'
     name_string = paste( param$algo,
                  param$nfolds%>%as.character() ,"fold",
-                 "std","sea",
-                 param$season%>%as.character(), sep="_")
+                 type,"sea",
+                 param$season%>%as.character(), sep="_")  #type: std --> perc
     # for liguria (with  no neighbouring) just two options:
     # to use vegetation like in rf and ruf, or to use
     # neighboring as vegetation (mlp and svm)
-    if(param$algo %in% c("randomForest", "ruf")){   
-    my_excluded_cols =excluded_cols_base_rf_nop
+    if(param$algo %in% c("randomForest", "ruf")){
+      
+    my_excluded_cols = excluded_cols_base_nothing_rf_bg  # excluded_cols_base_rf_bg and excluded_cols_base_xy_rf_bg if xy are excluded 
+    
     }else{
     my_excluded_cols = excluded_cols_base_mlp
     } 
@@ -297,7 +318,7 @@ name <- 'mlpr_fivefolds_std_s'
 #  mtry, ntree, nodesize, name, resolution,algo
 #)
 
-algo="rf"
+algo="randomForest"
 name <- 'rf_fivefolds_std_s'
 rf_fivefolds_std_s <- do_experiment(
   points_df, fires_df, excluded_cols_base_rf, season, 

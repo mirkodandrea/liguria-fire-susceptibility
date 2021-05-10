@@ -12,7 +12,7 @@ if(is_Liguria){
   shapes_dir = 'shapefiles'
   vegetation_string = "veg_type" 
   # years of analysis 
-	year_1 = 2000#2012#1997
+	year_1 = 1997#2012#1997
 	year_2 = 2015  
 }else if (is_Sardegna) {
 	year_1 =  2007 
@@ -28,6 +28,25 @@ if(is_Liguria){
 	year_1 =  2007 
 	year_2 = 2015
 	shapes_dir = '{region_name}_shapefiles' %>% g
+  vegetation_string = "veg"
+}else if (is_Liguria_s) {
+  year_1 =  2007 
+  year_2 = 2015
+  shapes_dir = 'shapefiles_lig_s'
+  vegetation_string = "veg"
+}else if (is_Sicilia_s) {
+  year_1 =  2007 
+  year_2 = 2015
+  shapes_dir = 'shapefiles_sicilia_s'
+  vegetation_string = "veg"
+}else if (is_Liguria_Sicilia) {
+  year_1 =  2007 
+  year_2 = 2015
+  vegetation_string = "veg"
+}else if (is_Bulgaria){
+  year_1 =  2006 
+  year_2 = 2014
+  shapes_dir = '{region_name}_shapefiles' %>% g
   vegetation_string = "veg"
 }
 
@@ -80,20 +99,54 @@ if ( load_data ){
 if(is_Sardegna){
 	BA <- readOGR("{shapes_dir}/incendi_sar_wgs84_32N.shp"  %>% g)
 	BA$stagione = 2 
-} else {
+} else if(is_Liguria_s){
+  BA <- readOGR("{shapes_dir}/liguria_incendi_wgs84_32N.shp"  %>% g)
+  BA$stagione = 1
+  BA$month = strtoi(BA$month)
+  #BA <- transform(BA,stagione = ifelse(is_in(month, 5:10), 2, 1) ) it looses the class, goes  to simple dataframe...
+  BA$anno = strtoi(BA$year)
+  BA@data[is_in(BA@data$month, 5:10), "stagione"] <- 2 #it keeps the spatialpolygonsdataframe class
+  
+  
+  
+}else if(is_Sicilia_s){
+  BA <- readOGR("{shapes_dir}/sicilia_incendi_wgs84_32N.shp"  %>% g)
+  BA$stagione = 2
+  BA$anno = strtoi(BA$year)
+  }else if(is_Liguria_Sicilia){
+  shapes_dir1 = "shapefiles_lig_s"
+  BA1 <- readOGR("{shapes_dir1}/liguria_incendi_wgs84_32N.shp"  %>% g)
+  shapes_dir2 = "shapefiles_sicilia_s"
+  BA2 <- readOGR("{shapes_dir2}/sicilia_incendi_wgs84_32N.shp"  %>% g)
+  BA <- bind(BA1, BA2)
+  BA$stagione = 1
+  BA$month = strtoi(BA$month)
+  #BA <- transform(BA,stagione = ifelse(is_in(month, 5:10), 2, 1) ) it looses the class, goes  to simple dataframe...
+  BA$anno = strtoi(BA$year)
+  BA@data[is_in(BA@data$month, 5:10), "stagione"] <- 2 #it keeps the spatialpolygonsdataframe class
+  }else if(is_Bulgaria){
+    BA <- readOGR("/home/gruppo4/Bulgaria/bg_dati_per_cluster/merge_fires_diss_ry_wgs84_35N.shp"  %>% g)
+    BA$stagione = 2
+    BA$year = strtoi(BA$random_yea)
+    BA$anno = strtoi(BA$year)
+  }else {
 	BA <- readOGR("{shapes_dir}/perimetrazioni_1997_2017.shp"  %>% g)
 	BA$anno = as.numeric(BA$anno)
 	BA$stagione = as.numeric(BA$stagione)
 }
 if(length(year_test)==1){
-  BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
-  BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+  if(is_Bulgaria){
+    BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+  }else{
+    BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
+    BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+  }
+  
 }else{
   BA_test_w <- BA[((BA$stagione==1) & (BA$anno %in% year_test)), ]
   BA_test_s <- BA[((BA$stagione==2) & (BA$anno %in% year_test)), ]
   
 }
-
 for (exp in experiments) {
   writeRaster(exp@raster, "{output_dir}/{exp@name}.tiff" %>% g, overwrite = TRUE)
 }
@@ -176,9 +229,14 @@ if (user_clustering && exp@season == 1 ){
   years = seq(year_1,  year_2)
 }
 for(year in years){
-  BA_test_w <- BA[((BA$stagione==1) & (BA$anno == year)), ]
-  BA_test_s <- BA[((BA$stagione==2) & (BA$anno == year)), ]
-  for (exp in experiments) {
+
+  if(is_Bulgaria){
+    BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+  }else{
+    BA_test_w <- BA[((BA$stagione==1) & (BA$anno >= year_test)), ]
+    BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
+  }
+    for (exp in experiments) {
     if ( exp@season == 1 ){
       BA_test <- BA_test_w
     } else {
@@ -196,12 +254,14 @@ for(year in years){
   }
 }
 
+
+
 if (!user_clustering){
-  write.csv(df_performances[year_1:year_2, ], file = '{output_dir}/performances_{exp@algo}.csv' %>% g)
-  write.csv(df_area_Y[year_1:year_2, ], file = '{output_dir}/area_Y_{exp@algo}.csv' %>% g)
+  write.csv(df_performances[year_1:year_2, ], file = '{output_dir}/performances_{exp@name}.csv' %>% g)
+  write.csv(df_area_Y[year_1:year_2, ], file = '{output_dir}/area_Y_{exp@name}.csv' %>% g)
 }else{
-  write.csv(c(df_performances[years[1],],df_performances[years[2],],df_performances[years[3],]), file = '{output_dir}/performances_{exp@algo}.csv' %>% g)
-  write.csv(c(df_area_Y[years[1],],df_area_Y[years[2],],df_area_Y[years[3],]), file = '{output_dir}/area_Y_{exp@algo}.csv' %>% g)
+  write.csv(c(df_performances[years[1],],df_performances[years[2],],df_performances[years[3],]), file = '{output_dir}/performances_{exp@name}.csv' %>% g)
+  write.csv(c(df_area_Y[years[1],],df_area_Y[years[2],],df_area_Y[years[3],]), file = '{output_dir}/area_Y_{exp@name}.csv' %>% g)
 }
 auc_results=c();
 for (exp in experiments) {
@@ -211,12 +271,17 @@ for (exp in experiments) {
   auc_results<- c(auc_results, '{exp@name} - auc: {mean(exp@auc)} - area: {value}' %>% g)
   print("{exp@name} - auc: {mean(exp@auc)} - area: {value}" %>% g)
 }
-write.csv(auc_results, file = '{output_dir}/{exp@algo}_AUC.csv' %>% g)
+write.csv(auc_results, file = '{output_dir}/{exp@name}_AUC.csv' %>% g)
 
 #------------------------------- Build test dataset to check RMSE ---------------------------------#
-if(is_Sardegna){
+if(is_Sardegna|is_Liguria_s|is_Sicilia_s){
+  dataset_w <- build_dataset(points_df, fires_df, 1, year_test, 9999)
+  test_dataset_w <- select_pseudo_absences(dataset_w@data, dataset_w@data$fire == 1)
 	dataset_s <- build_dataset(points_df, fires_df, 2, year_test, 9999)
 	test_dataset_s <- select_pseudo_absences(dataset_s@data, dataset_s@data$fire == 1)
+}else if(is_Bulgaria){
+  dataset_s <- build_dataset(points_df, fires_df, 2, year_test, 9999)
+  test_dataset_s <- select_pseudo_absences(dataset_s@data, dataset_s@data$fire == 1)
 }else{
 	dataset_w <- build_dataset(points_df, fires_df, 1, year_test, 9999)
 	test_dataset_w <- select_pseudo_absences(dataset_w@data, dataset_w@data$fire == 1)
@@ -234,5 +299,5 @@ for (exp in experiments) {
   rmse_results<- c(rmse_results, 'The rmse of {exp@name} is: {rmse_value}' %>% g)
   print('{exp@name} : {rmse_value}' %>% g)
 }
-write.csv(rmse_results, file = '{output_dir}/{exp@algo}_RMSE.csv' %>% g)
+write.csv(rmse_results, file = '{output_dir}/{exp@name}_RMSE.csv' %>% g)
 

@@ -1,7 +1,7 @@
 #install.packages(c('ModelMetrics', 'Metrics', 'pROC', 'caret', 
 #                   'randomForest', 'raster', 'dplyr', 'foreign', 
 #                 'maptools', 'randomForest', 'rgdal', 'readxl', 
-#                'glue', 'caret', 'ModelMetrics', 'Metrics', 
+#                'glue', 'caret', 'ModelMetrics', 'Metrics') 
 #                 'pROC', 'raster', 'plyr', 'ggplot2', 'sp', 'plyr', 'raster','e1071'))
 
 #install.packages("RSNNS",  "randomUniformForest", "NeuralNetTools")
@@ -90,12 +90,13 @@ build_dataset <- function(points_df, fires_df, season, year_from, year_to) {
                      subset(.$stagione == season)
   if(length(year_to)==1){
   sel_fires_df <- season_fires_df %>% 
-                  subset(.$anno >= year_from) %>% 
-                  subset(.$anno < year_to)
+                  subset(.$year >= year_from) %>% 
+                  subset(.$year < year_to)
+  
   }else{ # this is the case when the user specifies a specific vector of years  for test.
     sel_fires_df <- season_fires_df %>% 
-                    subset(.$anno >= year_from) %>%
-                    subset(!(.$anno %in% year_to))
+                    subset(.$year >= year_from) %>%
+                    subset(!(.$year %in% year_to))
   }
   
   fire_points <- sel_fires_df$point_index    
@@ -103,14 +104,19 @@ build_dataset <- function(points_df, fires_df, season, year_from, year_to) {
   
   no_absence_points <- season_fires_df$point_index
   absences_df <- points_df[-no_absence_points, ]
+
+  print("I'm here ")
   
   presences_df$fire = 1
   absences_df$fire = 0
   
   dataset <- rbind(presences_df, absences_df)
+  
   dataset$fire <- dataset$fire %>% as.factor
   #dataset <- clusterDataset(dataset)
   return(dataset)
+
+  
 }
 
 
@@ -164,7 +170,7 @@ split_test_train <- function(dataset, columns, fold){
   set.seed(10)
   sample <- sample.int(
     n = nrow(dataset), 
-    size = floor(0.3333*nrow(dataset)), #0.3333     0.4  Sardegna:0.2
+    size = floor(0.99*nrow(dataset)), #0.3333     0.4  Sardegna:0.2
     replace = F
   )
   dataset <- dataset[sample, ]#sample
@@ -203,7 +209,7 @@ train_single_fold <- function(dataset, test_ratio=0.2, columns, model,algo, ...)
   pres_and_abs <- select_pseudo_absences(dataset %>% as.data.frame, dataset$fire == 1)
   sample <- sample.int(
     n = nrow(pres_and_abs), 
-    size = floor(0.3333*nrow(pres_and_abs)), #test_ratio 0.4
+    size = floor(0.2*nrow(pres_and_abs)), #test_ratio 0.4
     replace = F
   )
   TR <- pres_and_abs[sample, ]
@@ -433,7 +439,9 @@ build_and_train <- function(points_df, fires_df, excluded_cols, season,
     print("Name is missing in model_functions build_and_train")
     name <- algo
   } 
+  print("prima di  build_dataset")
   dataset <- build_dataset(points_df, fires_df, season, year_from, year_test)
+  print("dopo di  build_dataset")
   
   columns = names(dataset) %>% subset(!. %in% excluded_cols)
   
@@ -516,7 +524,7 @@ do_experiment <- function(
   print(algo)
   
   if (algo == "randomForest") {
-    
+    print("prima di build and train")
     list[RFS, AUC, TR, TS] <- build_and_train(
       points_df, fires_df, excluded_cols, season, 
       year_from, year_test, box_dimension, nfolds,
@@ -566,8 +574,10 @@ do_experiment <- function(
     }
   
 
-  
-  f <- fit_points(points_df, excluded_cols, RFS,algo)
+  if(is_Bulgaria)
+    f <- fit_points(all_points_df, excluded_cols, RFS,algo)
+  else
+    f <- fit_points(points_df, excluded_cols, RFS,algo)
  
   if(is_Sardegna)
 	proj <- CRS("+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs")#in caso questo per puglia/sicilia
@@ -577,6 +587,8 @@ do_experiment <- function(
     proj <- CRS("+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs")
   else if(is_Sicilia)
 	proj <- CRS("+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs")
+  else if(is_Bulgaria)
+    proj <-  CRS("+proj=utm +zone=35 +datum=WGS84 +units=m +no_defs")
 	
 	
   r <- to_raster(f, resolution, crs=proj) 
