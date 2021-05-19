@@ -1,49 +1,14 @@
+# create output folder
 dir.create(output_dir, showWarnings = F)
 
+# parameter for loading R data (.RData format)
 load_data <- F
+
+# parameter for evaluating the variables' importance 
 do_class_imp <- T
 
-# Specific years of testing... In this part, if no user define vector of testing years
-# is specified, the test years will be 
-#
-#             years = seq(year_1,  year_2)
-
-if(is_Liguria){
-  shapes_dir = 'shapefiles'
-  vegetation_string = "veg_type" 
-  # years of analysis 
-	year_1 = 1997#2012#1997
-	year_2 = 2015  
-}else if (is_Sardegna) {
-	year_1 =  2007 
-	year_2 = 2016
-	shapes_dir = '{region_name}_shapefiles' %>% g
-  vegetation_string = "veg"
-}else if (is_Puglia) {
-	year_1 =  2007 
-	year_2 = 2015
-	shapes_dir = '{region_name}_shapefiles' %>% g
-  vegetation_string = "veg"
-}else if (is_Sicilia) {
-	year_1 =  2007 
-	year_2 = 2015
-	shapes_dir = '{region_name}_shapefiles' %>% g
-  vegetation_string = "veg"
-}else if (is_Liguria_s) {
-  year_1 =  2007 
-  year_2 = 2015
-  shapes_dir = 'shapefiles_lig_s'
-  vegetation_string = "veg"
-}else if (is_Sicilia_s) {
-  year_1 =  2007 
-  year_2 = 2015
-  shapes_dir = 'shapefiles_sicilia_s'
-  vegetation_string = "veg"
-}else if (is_Liguria_Sicilia) {
-  year_1 =  2007 
-  year_2 = 2015
-  vegetation_string = "veg"
-}else if (is_Bulgaria){
+# Specific years of training and testing
+if (is_Bulgaria){
   year_1 =  2006 
   year_2 = 2014
   shapes_dir = '{region_name}_shapefiles' %>% g
@@ -51,41 +16,14 @@ if(is_Liguria){
 }
 
 
-### PLEASE SELECT ONLY THE EXPERIMENTS THAT HAVE BEEN DEFINED  IN  model.R
-### If I want to do a batch test, I simply re-use the list of models I have
-### trained so far...
+# if batch_test = False please select only the experiments that have been defined in model.R
+# If batch test = True,it will be re-used the list of models trained so far
+
 if(batch_test == TRUE){
  experiments = results_list  
 }else{
 experiments <- c(
-  #onefold_ksvm_s,
-  #onefold_std_s
-  #onefold_std_w,
-  #onefold_perc_w
-  # onefold_freq_w,
-  #fivefolds_std_w
-  #fivefolds_perc_w,
-  #fivefolds_freq_w,
-  #ninefolds_perc_w,
-  #onefold_perc_s
-  # onefold_freq_s,
-  #mlpr_fivefolds_std_s,
-  #svm_fivefolds_std_s,
-  #ruf_nop_fivefolds_std_s
-  #ruf_fivefolds_std_s,
   rf_fivefolds_std_s
-  #rf_nop_fivefolds_std_s
-  #mlp_fivefolds_std_s
-  #fivefolds_perc_s,
-  #fivefolds_freq_s,
-  #ninefolds_perc_s
-  #ruf_onefold_std_s,
-  #ruf_nop_onefold_std_s,
-  #svm_onefold_std_s,
-  #mlpr_onefold_std_s,
-  #rf_onefold_std_s
-  #rf_nop_onefold_std_s
-  #mlp_onefold_std_s
 )
 }
 
@@ -94,47 +32,19 @@ if ( load_data ){
   load(data_file)
 }
 
-# extract test fires from shapefile
 
-if(is_Sardegna){
-	BA <- readOGR("{shapes_dir}/incendi_sar_wgs84_32N.shp"  %>% g)
-	BA$stagione = 2 
-} else if(is_Liguria_s){
-  BA <- readOGR("{shapes_dir}/liguria_incendi_wgs84_32N.shp"  %>% g)
-  BA$stagione = 1
-  BA$month = strtoi(BA$month)
-  #BA <- transform(BA,stagione = ifelse(is_in(month, 5:10), 2, 1) ) it looses the class, goes  to simple dataframe...
-  BA$anno = strtoi(BA$year)
-  BA@data[is_in(BA@data$month, 5:10), "stagione"] <- 2 #it keeps the spatialpolygonsdataframe class
-  
-  
-  
-}else if(is_Sicilia_s){
-  BA <- readOGR("{shapes_dir}/sicilia_incendi_wgs84_32N.shp"  %>% g)
-  BA$stagione = 2
-  BA$anno = strtoi(BA$year)
-  }else if(is_Liguria_Sicilia){
-  shapes_dir1 = "shapefiles_lig_s"
-  BA1 <- readOGR("{shapes_dir1}/liguria_incendi_wgs84_32N.shp"  %>% g)
-  shapes_dir2 = "shapefiles_sicilia_s"
-  BA2 <- readOGR("{shapes_dir2}/sicilia_incendi_wgs84_32N.shp"  %>% g)
-  BA <- bind(BA1, BA2)
-  BA$stagione = 1
-  BA$month = strtoi(BA$month)
-  #BA <- transform(BA,stagione = ifelse(is_in(month, 5:10), 2, 1) ) it looses the class, goes  to simple dataframe...
-  BA$anno = strtoi(BA$year)
-  BA@data[is_in(BA@data$month, 5:10), "stagione"] <- 2 #it keeps the spatialpolygonsdataframe class
-  }else if(is_Bulgaria){
+# extract test fires from shapefile
+if(is_Bulgaria){
+    # reading the shapefile of fires for future analysis (it must include a 'year' column)
     BA <- readOGR("/home/gruppo4/Bulgaria/bg_dati_per_cluster/merge_fires_diss_ry_wgs84_35N.shp"  %>% g)
-    BA$stagione = 2
+    BA$stagione = 2                 # the season is just one for all months 
     BA$year = strtoi(BA$random_yea)
     BA$anno = strtoi(BA$year)
-  }else {
-	BA <- readOGR("{shapes_dir}/perimetrazioni_1997_2017.shp"  %>% g)
-	BA$anno = as.numeric(BA$anno)
-	BA$stagione = as.numeric(BA$stagione)
 }
+
+# option for considering custom test years. 
 if(length(year_test)==1){
+  # create test set without seasonal division for Bulgaria case
   if(is_Bulgaria){
     BA_test_s <- BA[((BA$stagione==2) & (BA$anno >= year_test)), ]
   }else{
@@ -147,17 +57,22 @@ if(length(year_test)==1){
   BA_test_s <- BA[((BA$stagione==2) & (BA$anno %in% year_test)), ]
   
 }
+
+
 for (exp in experiments) {
   writeRaster(exp@raster, "{output_dir}/{exp@name}.tiff" %>% g, overwrite = TRUE)
 }
 
 for (exp in experiments) {
+  # define 2 datasets for summer and winter in case seasonal division is taken into account
   if ( exp@season == 1 ){
     BA_test <- BA_test_w
   } else {
     BA_test <- BA_test_s
   }
+}
   
+  # Do some analysis 
   print('{exp@name}' %>% g)
   out_dir <- "{output_dir}/{exp@name}" %>% g
   dir.create(out_dir, showWarnings = F)
@@ -175,46 +90,26 @@ for (exp in experiments) {
   print(df_binary)
   write.csv(df_binary, file = "{out_dir}/binary.csv" %>% g)
   #svg_filename <- "{out_dir}/var_imp.svg" %>% g
-  #print("I am not doing here any Writing {svg_filename}" %>% g)
-  #print(plot_var_importance(exp, 20)) just 20 variables
-  print(plot_var_importance(exp)) #now it visualizes everything
-  
-  if(is_Sardegna){
-	#svg(
-		#filename = svg_filename,
-		#width=12, 
-		#height=9, 
-		#pointsize=12
-	#)
-	print(plot_var_importance(exp, 20))
-	#dev.off()
-  }
+  print(plot_var_importance(exp)) # it visualizes variables importance
   
   
   if (do_class_imp){
-    #svg(filename = "{out_dir}/class_imp_type.svg" %>% g)
+    # svg(filename = "{out_dir}/class_imp_type.svg" %>% g)
     if(exp@algo=='randomForest'){
       print(plot_class_importance(exp, vegetation_string))
       #dev.off()
-	    if(is_Liguria){
-		    if ( 'veg_freq' %in% exp@columns ){
-			  #svg(filename = "{out_dir}/class_imp_freq.svg" %>% g)
-			  print(plot_class_importance(exp, 'veg_freq'))
-		  }
-	  }
-	    else{
-        if ( 'veg' %in% exp@columns ){
-          #svg(filename = "{out_dir}/class_imp_freq.svg" %>% g)
-          print(plot_class_importance(exp, 'veg'))
-        }
-	    }
+      if ( 'veg' %in% exp@columns ){
+        #svg(filename = "{out_dir}/class_imp_freq.svg" %>% g)
+        print(plot_class_importance(exp, 'veg'))
+      }
+	    
     }else if(exp@algo=='ruf'){
       plot_class_importance(exp,vegetation_string)
     }else{
       print("I am {exp@algo}, hence I don't have yet  a partialplot equivalent, sorry!" %>% g)
     }
   }
-}
+
 
 
 df_performances <- data.frame()
@@ -255,7 +150,7 @@ for(year in years){
 }
 
 
-
+# save the model performances
 if (!user_clustering){
   write.csv(df_performances[year_1:year_2, ], file = '{output_dir}/performances_{exp@name}.csv' %>% g)
   write.csv(df_area_Y[year_1:year_2, ], file = '{output_dir}/area_Y_{exp@name}.csv' %>% g)
@@ -273,13 +168,9 @@ for (exp in experiments) {
 }
 write.csv(auc_results, file = '{output_dir}/{exp@name}_AUC.csv' %>% g)
 
+
 #------------------------------- Build test dataset to check RMSE ---------------------------------#
-if(is_Sardegna|is_Liguria_s|is_Sicilia_s){
-  dataset_w <- build_dataset(points_df, fires_df, 1, year_test, 9999)
-  test_dataset_w <- select_pseudo_absences(dataset_w@data, dataset_w@data$fire == 1)
-	dataset_s <- build_dataset(points_df, fires_df, 2, year_test, 9999)
-	test_dataset_s <- select_pseudo_absences(dataset_s@data, dataset_s@data$fire == 1)
-}else if(is_Bulgaria){
+if(is_Bulgaria){
   dataset_s <- build_dataset(points_df, fires_df, 2, year_test, 9999)
   test_dataset_s <- select_pseudo_absences(dataset_s@data, dataset_s@data$fire == 1)
 }else{

@@ -37,7 +37,7 @@ extract_stats <- function(raster, BA){
 }
 
 
-
+# fucntion for calculating the variable importance
 plot_var_importance <- function(exp, n=NULL){
   imp <- c()
   
@@ -49,7 +49,6 @@ plot_var_importance <- function(exp, n=NULL){
        
     if(exp@algo=="svm" | exp@algo == "mlp_rminer"){
         var_imp <- rminer::Importance(model,exp@tr[[c]], method = "sensv")
-        # attenzione: mi pare che rminer:Importance() ha come componenti anche "fire" che e' var dipend., sempre = 0
         vett_imp <- c()
         vett_names <- c()
         for (e in 1:length(var_imp$imp)){
@@ -57,7 +56,7 @@ plot_var_importance <- function(exp, n=NULL){
             vett_imp[e] <- var_imp$imp[e]    
         }
         for (e in 1:length(var_imp$sresponses)){
-          #salvo i nomi delle variabili
+          #save variables' name
           if(!is.null(var_imp$sresponses[[e]]$n))
             vett_names[e]<- var_imp$sresponses[[e]]$n
         }
@@ -85,9 +84,9 @@ plot_var_importance <- function(exp, n=NULL){
     }
     #------------------------------------------------------------------    
     else if(exp@algo=="ruf"){
-      imp_df <- data.frame( model$forest$variableImportance$score)#domanda_1
+      imp_df <- data.frame( model$forest$variableImportance$score)
       rownames(imp_df) =  model$forest$variableImportance$variables
-      #rownames(imp_df) <- rownames(imp_df)#aggiunta da sara ora
+      #rownames(imp_df) <- rownames(imp_df)
       imp[[c]] <- imp_df
       }
     else{
@@ -105,14 +104,14 @@ plot_var_importance <- function(exp, n=NULL){
     imp <- abind(imp, along=3)#mischio
     imp_mean <- apply(imp, c(1,2), mean)
     imp_sd <- apply(imp, c(1,2), sd)
-    df <- data.frame(mean=imp_mean[,], sd=imp_sd[,])#media e std df---data.frame
+    df <- data.frame(mean=imp_mean[,], sd=imp_sd[,])# mean and std df---data.frame
     colnames(df) <- c('mean', 'sd')
     df$class <- rownames(df)
     df <- df[order(-df$mean),]
     if( !is.null(n) ) {
       df <- df %>% head(n)
     }
-    write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g)#stampo csv in modo da evitare file svg  
+    write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g) # saving in csv format
     
   }
   else if(exp@algo=="ruf"){
@@ -128,7 +127,7 @@ plot_var_importance <- function(exp, n=NULL){
     if( !is.null(n) ) {
       df <- df %>% head(n)
     }
-    write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g)#stampo csv in modo da evitare file svg  
+    write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g) # saving in csv format
     return( df )
     
   }#end ruf
@@ -137,7 +136,7 @@ plot_var_importance <- function(exp, n=NULL){
     imp <- abind(imp, along=3)
     imp_mean <- apply(imp, c(1,2), mean)
     imp_sd <- apply(imp, c(1,2), sd)
-    df <- data.frame(mean=imp_mean[,], sd=imp_sd[,])#media e std df---data.frame
+    df <- data.frame(mean=imp_mean[,], sd=imp_sd[,])# mean and std df---data.frame
     colnames(df) <- c('mean', 'sd')
     df$class <- rownames(df)
     df <- df[order(-df$mean),]
@@ -145,7 +144,7 @@ plot_var_importance <- function(exp, n=NULL){
       df <- df %>% head(n)
     }
     
-    write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g)#stampo csv in modo da evitare file svg  
+    write.csv(df,  '{output_dir}/variable_importance_{exp@name}.csv' %>% g) # saving in csv format  
 
   
   } #end randomforest
@@ -240,23 +239,24 @@ partialPlotRuf <-  function (x, pred.data, x.var, which.class, w, plot=TRUE, add
   }
 
 
+# importance of classes inside a certain variable (like the vegetation one)
 plot_class_importance <- function(exp, variable_name, n=NULL){
   pp_veg = c()
   if(exp@algo == "ruf"){
     for(c in 1:length(exp@models)){
       model <- exp@models[[c]]
-      tr = exp@tr[[c]]#[1:6000,] #Per limitare il numero delle prove...
+      tr = exp@tr[[c]]#[1:6000,] # reduce trials 
       pP_params <- list(x=model,  pred.data= tr, 
                         x.var=variable_name, which.class="1", plot=F) 
       pp_veg[[c]] <- do.call("partialPlotRuf", pP_params) %>%
-        as.data.frame(., row.names='x') # NO PLOT IN RSTUDIO!!
+        as.data.frame(., row.names='x') # NO PLOT IN RSTUDIO
       
     }
     
   }else{  
     for(c in 1:length(exp@models)){
       model <- exp@models[[c]]
-      tr = exp@tr[[c]]#[1:6000,]#limito num prove
+      tr = exp@tr[[c]]#[1:6000,] # reduce trialse
       pP_params <- list(x=model,  pred.data=tr, 
                         x.var=variable_name, which.class="1", plot=F) 
       pp_veg[[c]] <- do.call("partialPlot", pP_params) %>%
@@ -288,6 +288,7 @@ plot_ecdf <- function(raster, BA, add=F, col='black'){
   plot(ecdf(masked_vals), col = col, add = T)
 }
 
+# masking
 summary_masked <- function(raster, BA){
   masked <- mask(x=raster, mask=BA)
   
@@ -298,6 +299,7 @@ summary_masked <- function(raster, BA){
   return(df)
 }
 
+# evaluate quantiles 
 extract_on_quantiles <- function(raster, BA, quantiles = c(.25, .50, .75, .90, .95)){
   raster_vals <- raster@data@values
   q <- c(0, quantiles, 1)
@@ -309,6 +311,7 @@ extract_on_quantiles <- function(raster, BA, quantiles = c(.25, .50, .75, .90, .
   return(df)
 }
 
+# function for evaluating what is the percentage of fires that falls inside a quantile range of values 
 extract_on_thresholds <- function(raster, BA, 
     thresholds = c(0, 0.2, 0.4, 0.6, 0.8, 1.0),
     thresholds_names = c('VERY-LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY-HIGH')
@@ -339,6 +342,7 @@ extract_on_thresholds <- function(raster, BA,
   return(df)
 }
 
+# calculate the rmse on the test dataset
 test_experiment <- function(exp, test_dataset){
   obs_value <- test_dataset$fire == '1'
   list_of_pred <- c()
@@ -353,7 +357,7 @@ test_experiment <- function(exp, test_dataset){
       pred <- predict(
       object = m, 
       newdata = test_dataset[, exp@columns],type = "prob")
-      #RMINER 1.3.1 issue -> remove type = prob   pero' su randomForest  ci va il type = prob...
+      
     
   }
     if(exp@algo == "ruf"){
